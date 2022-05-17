@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 def calculation(D):
     
     Qs=[]
+    
     for d in D:
         
         #relavent x and y's and edge of square
@@ -14,11 +15,10 @@ def calculation(D):
         x_s=[]
         y_s=[]
         pi=np.pi
-        e0=8.85*(10**-12)
+        
 
         #Define Circle
         R=1
-        c_point=[0,0]
         circ_func=lambda x: x[0]**2+x[1]**2
 
         steps=int(np.ceil(2*R/d))
@@ -51,8 +51,8 @@ def calculation(D):
         ##Building vectors for system
         V_potential=np.transpose(np.ones([1,len(x_s)]))
 
-        sigma=(d**2)*np.matmul(inv_l_matrix,V_potential)
-        Qs.append(np.sum(sigma))
+        qi=(d**2)*np.matmul(inv_l_matrix,V_potential)
+        Qs.append(np.sum(qi))
     
     return Qs
 
