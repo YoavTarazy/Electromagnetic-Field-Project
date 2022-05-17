@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-
+import matplotlib.pyplot as plt
 
 
 
@@ -44,7 +44,7 @@ def calculate_same_matrix(d):
     return l_matrix              
 
     
-def calculate_relation_matrix(d):
+def calculate_relation_matrix(d,D):
     
             #relavent x and y's and edge of square
      
@@ -76,26 +76,54 @@ def calculate_relation_matrix(d):
     for i in range(len(x_s)):
             for j in range(len(x_s)):
                 
-                l_matrix[i][j]=d**2/(4*pi*e0*np.sqrt((x_s[i]-x_s[j])**2+(y_s[i]-y_s[j])**2)+(R/2)**2)
+                l_matrix[i][j]=d**2/(4*pi*e0*np.sqrt((x_s[i]-x_s[j])**2+(y_s[i]-y_s[j])**2+(D)**2))
 
     return l_matrix              
 
-d=0.08
+def calculate_Q_for_D(d,D):
+    
+    Qs=[]
+    mat_AA,mat_BB=calculate_same_matrix(d),calculate_same_matrix(d)
+    
+    for ds in D:
+        
 
-mat_AA,mat_BB=calculate_same_matrix(d),calculate_same_matrix(d)
+        mat_AB=calculate_relation_matrix(d,ds)
+        mat_BA=np.transpose(mat_AB)
+        mat_AAAB=np.concatenate((mat_AA,mat_AB),axis=1)
+        mat_BABB=np.concatenate((mat_BA,mat_BB),axis=1)
+        big_mat=np.concatenate((mat_AAAB,mat_BABB),axis=0)
+        inv_big_mat=np.linalg.inv(big_mat)
 
-mat_AB=calculate_relation_matrix(d)
-mat_BA=np.transpose(mat_AB)
+        V_potential_positive=np.transpose(np.ones([1,mat_AA.shape[0]]))*(0.5)
+        V_potential_negative=np.transpose(np.ones([1,mat_AA.shape[0]]))*(-0.5)
+        V_tot=np.concatenate((V_potential_positive,V_potential_negative),axis=0)
 
-mat_AAAB=np.concatenate((mat_AA,mat_AB),axis=1)
-mat_BABB=np.concatenate((mat_BA,mat_BB),axis=1)
-big_mat=np.concatenate((mat_AAAB,mat_BABB),axis=0)
-inv_big_mat=np.linalg.inv(big_mat)
+        qi=(d**2)*np.matmul(inv_big_mat,V_tot)
+        Qs.append(np.sum(qi[0:int(qi.shape[0]/2)]))
 
-V_potential_positive=np.transpose(np.ones([1,mat_AA.shape[0]]))*0.5
-V_potential_negative=np.transpose(np.ones([1,mat_AA.shape[0]]))*(-0.5)
-V_tot=np.concatenate((V_potential_positive,V_potential_negative),axis=0)
+    return Qs
+        
 
-qi=(d**2)*np.matmul(inv_big_mat,V_tot)
-Qs=np.sum(qi)
-print(Qs)
+
+d=0.025
+e0=8.85*(10**-12)
+
+#print(calculate_Q_for_D(d,[0.5]))
+#print(calculate_Q_for_D(d,[0.2]))
+#print(calculate_Q_for_D(d,[0.1]))
+#print(calculate_Q_for_D(d,[0.0001]))
+
+Ds=np.linspace(d/3,1,10)
+graphingdf=pd.DataFrame({'D':list(Ds)})
+graphingdf['C_theory']=(e0*np.pi)/graphingdf['D']
+graphingdf['C_num']=calculate_Q_for_D(d,graphingdf['D'])
+graphingdf['Error']=(graphingdf['C_num']/graphingdf['C_theory'])*100
+
+fig=plt.figure(figsize=(10,10),dpi=200)
+plt.xlabel('D[m]')
+plt.ylabel('C[Farad]')
+plt.plot(graphingdf['D'],graphingdf['C_theory'],label="Theory Capacitance")
+plt.plot(graphingdf['D'],graphingdf['C_num'],label="Numeric Capacitance")
+plt.legend(loc="upper right")
+plt.show()
