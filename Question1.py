@@ -50,7 +50,7 @@ def calculation(D):
 
         ##Building vectors for system
         V_potential=np.transpose(np.ones([1,len(x_s)]))
-
+        ############qi=(d**2)*np.linalg.solve(l_matrix,V_potential)
         qi=(d**2)*np.matmul(inv_l_matrix,V_potential)
         Qs.append(np.sum(qi))
     

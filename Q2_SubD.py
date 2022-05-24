@@ -95,47 +95,15 @@ def calculate_Q_for_D(d,D):
         big_mat=np.concatenate((mat_AAAB,mat_BABB),axis=0)
         inv_big_mat=np.linalg.inv(big_mat)
 
-        V_potential_positive=np.transpose(np.ones([1,mat_AA.shape[0]]))*(0.5)
-        V_potential_negative=np.transpose(np.ones([1,mat_AA.shape[0]]))*(-0.5)
+        V_potential_positive=np.transpose(np.ones([1,mat_AA.shape[0]]))*1
+        V_potential_negative=np.transpose(np.ones([1,mat_AA.shape[0]]))*(-1)
         V_tot=np.concatenate((V_potential_positive,V_potential_negative),axis=0)
 
         qi=(d**2)*np.matmul(inv_big_mat,V_tot)
-        Qs.append(np.sum(qi[0:int(qi.shape[0]/2)]))
+        Qs.append(np.sum(qi))
 
         
     return Qs
         
 
-
-d=0.025
-e0=8.85*(10**-12)
-
-#print(calculate_Q_for_D(d,[0.5]))
-#print(calculate_Q_for_D(d,[0.2]))
-#print(calculate_Q_for_D(d,[0.1]))
-#print(calculate_Q_for_D(d,[0.0001]))
-
-Ds=np.linspace(d/3,1,10)
-graphingdf=pd.DataFrame({'D':list(Ds)})
-graphingdf['C_theory']=(e0*np.pi)/graphingdf['D']
-graphingdf['C_num']=calculate_Q_for_D(d,graphingdf['D'])
-
-
-fig=plt.figure(figsize=(10,10),dpi=200)
-plt.xlabel('D[m]')
-plt.ylabel('C[Farad]')
-plt.plot(graphingdf['D'],graphingdf['C_theory'],label="Theory Capacitance")
-plt.plot(graphingdf['D'],graphingdf['C_num'],label="Numeric Capacitance")
-
-
-#########Calculating Relative Error
-graphingdf['Error']=(graphingdf['C_num']/graphingdf['C_theory'])*100
-plt.xlabel('D[m]')
-plt.ylabel('Error in percentage')
-plt.plot(graphingdf['D'],graphingdf['Error'],label="Relative Error")
-ax = plt.gca()
-ax.set_xlim([0,1])
-ax.set_ylim([80,300])
-
-plt.legend(loc="upper right")
-plt.show()
+print(calculate_Q_for_D(0.1,[0.5]))
